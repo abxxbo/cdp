@@ -12,7 +12,7 @@ cdp is a utility that copies files from one file to another. Its intention is to
   - **NOTE:** When `cdp` is done writing data to a partition/drive, it will automatically execute `sync(1)` for you.
   
 # Compiling
-You may compile CDP using
+You may compile CDP using this command. It is recommended that you do not compile cdp, rather, use one of the releases.
 ```sh
 $ make
 ```
