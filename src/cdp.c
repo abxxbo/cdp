@@ -20,7 +20,7 @@ void show_help(){
 void write_file(char* in_file, char* out_file){
   // Check if out_file is stdout
   // if so, write to stdout.
-  if(out_file == "stdout"){
+  if(strcmp(out_file, "stdout") == 0){
     FILE* fp = fopen(in_file, "rb");    // rb   => read binary
     char* line = NULL;
     size_t len = 0;
@@ -34,10 +34,13 @@ void write_file(char* in_file, char* out_file){
   } else {
     // Using else, just to make sure.
     FILE* fp_ = fopen(in_file, "rb");
-    FILE* fp2 = fopen(out_file, "w");
+    FILE* fp2 = fopen(out_file, "a");
     
     // Check if file is unreadable/unwriteable before we start.
-    if(!fp || !fp2) exit(EXIT_FAIL);
+    if(!fp_) {
+      perror("cdp");
+      exit(EXIT_FAIL);
+    }
 
     // start.
     char* line = NULL;
@@ -52,27 +55,31 @@ void write_file(char* in_file, char* out_file){
 }
 
 
-int main(int argc, char** argv){
+int main(int argc, char* argv[]){
   // variables
-  char* input_file, output_file;
+  char* input_file;
+  char* output_file;
   // Parse arguments
   if(argc >= 2){
     if(strcmp(argv[1], "--help") == 0) show_help();
     if(strcmp(argv[1], "--input-file") == 0){
-      // No --force-partition
-      input_file = argv[2];
-      if(strcmp(argv[3], "--output-file") == 0){
-        output_file = argv[4];
-        write_file(input_file, output_file);
-      }
+      printf("argv[2] = char*? %s\n", __builtin_types_compatible_p(typeof(argv[2]), char*) ? "Yes" : "No"); // stupid gcc
+      printf("argv[4] = char*? %s\n", __builtin_types_compatible_p(typeof(argv[4]), char*) ? "Yes" : "No");
+      
+      // copy to input_file
+      strcpy(input_file, argv[2]);
 
-      // No --output-file
-      if(output_file == "\0" || output_file == NULL){
-        // --output_file was not passed
-        write_file(input_file, "stdout");
+      // is output file detected?
+      if(strcmp(argv[3], "--output_file") == 0){
+        strcpy(output_file, argv[4]);
+      } else {
+        output_file = "stdout";
       }
     }
   }
+
+  // do thing
+  write_file(input_file, output_file);
 
   // quit
   return EXIT_PASS;
