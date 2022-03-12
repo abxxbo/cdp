@@ -68,9 +68,37 @@ int check_for_sudo() {
   return 0;
 }
 
+// get all partitions, check if partition passed is in system
+// 1 -- Yes, it is.
+// 0 -- No, it is not.
+int get_partis_check(char* drive, char* partition){
+  // Try opening file
+  blkid_probe pr = blkid_new_probe_from_filename(drive);
+  if(!pr) exit(EXIT_FAIL);
+
+  // Get number of partitions
+  blkid_partlist lp;
+  int nparts, i;
+  int sys_part = 0;
+
+  lp = blkid_probe_get_partitions(pr);
+  nparts = blkid_partlist_numof_partitions(lp);
+  printf("[ INFO ] There are %d paritions on the system.\n", nparts);
+
+  for(i = 0; i < nparts; i++){
+    char* dev_name;
+    pr = blkid_new_probe_from_filename(dev_name);
+    blkid_do_probe(pr);
+
+    if(strcmp(dev_name, partition) == 0){
+      printf("[ ERR ] Partition %s (Partition #%d) is a system partition!\n", dev_name, i);
+      sys_part = 1;
+    }
+  }
+  return sys_part;
+}
 // write to partition
 void write_file_to_partition(char* in, char* partition) {
-
 }
 
 int main(int argc, char* argv[]){
@@ -89,22 +117,29 @@ int main(int argc, char* argv[]){
       input_file = argv[2];
 
       // is output file detected?
-      if(argc >= 5) {
-        // output-file
-        if(strcmp(argv[3], "--output_file") != 0) output_file = "stdout";
-        output_file = argv[4];
+      // output-file
+      if(strcmp(argv[3], "--output-file") != 0) output_file = "stdout";
+      printf("%s : %s\n", argv[3], argv[4]);
+      output_file = argv[4];
 
-        // force sudo if using --force-partition
+      if(argv >= 6){
         if(strcmp(argv[5], "--force-partition") == 0){
           int with_sudo = check_for_sudo();
           if(with_sudo != 0) exit(EXIT_FAIL);
-          
+
+          // check if we did a system partition for argv[6]
+          char* drive = argv[6];
+          char* drive2 = drive[strlen(drive)-1] = '\0';
+
+          if(get_partis_check(drive2, drive) != 0){
+            exit(EXIT_FAIL);
+          }
+
           // continue.
-          write_file_to_partition(input_file, output_file);   // yes this requires different logic
+          write_file_to_partition(input_file, output_file);   // yes this requires different logic.
         }
-      } else {
-        output_file = "stdout";
       }
+      if(output_file == NULL) output_file == "stdout";
     }
   }
 

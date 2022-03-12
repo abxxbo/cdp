@@ -1,5 +1,6 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -pedantic -O2 -g
+CFLAGS := -Wall -Wextra -pedantic -O2 -g \
+					-lblkid
 
 BUILD := bin
 
