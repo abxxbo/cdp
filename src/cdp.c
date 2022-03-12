@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
+#include <blkid/blkid.h>
 
 #define EXIT_FAIL 2
 #define EXIT_PASS 0
@@ -54,22 +56,52 @@ void write_file(char* in_file, char* out_file){
   }
 }
 
+// returns 0 if sudo is given
+// returns non-0 if no sudo
+int check_for_sudo() {
+  uid_t uid = getuid(), euid = geteuid();
+  if(uid < 0 || uid != euid){
+    printf("[ ERR ] You are not using sudo, you will certaintly run into trouble.\n");
+    return 1;
+  }
+  // SUDO is given to us.
+  return 0;
+}
+
+// write to partition
+void write_file_to_partition(char* in, char* partition) {
+
+}
 
 int main(int argc, char* argv[]){
   // variables
-  char* input_file;
-  char* output_file;
+  char* input_file;     // input file -- REQUIRED.
+  char* output_file;    // output file -- if left blank assume /dev/stdout
+  int with_sudo;        // is sudo passed?
   // Parse arguments
   if(argc >= 2){
+    // help
     if(strcmp(argv[1], "--help") == 0) show_help();
+    
+
     if(strcmp(argv[1], "--input-file") == 0){
       // copy to input_file
       input_file = argv[2];
 
       // is output file detected?
-      if(argc >= 4) {
+      if(argc >= 5) {
+        // output-file
         if(strcmp(argv[3], "--output_file") != 0) output_file = "stdout";
         output_file = argv[4];
+
+        // force sudo if using --force-partition
+        if(strcmp(argv[5], "--force-partition") == 0){
+          int with_sudo = check_for_sudo();
+          if(with_sudo != 0) exit(EXIT_FAIL);
+          
+          // continue.
+          write_file_to_partition(input_file, output_file);   // yes this requires different logic
+        }
       } else {
         output_file = "stdout";
       }
