@@ -25,8 +25,8 @@ $ cdp --input-file example.iso --output-file /dev/sda
 ### Writing to stdout
 ```sh
 $ cat << EOF > foo
-> Example file to be printed to stdout
-> EOF
+Example file to be printed to stdout
+EOF
 $ cdp --input-file foo
 Example file to be printed to stdout.
 ```
@@ -34,8 +34,8 @@ Example file to be printed to stdout.
 ### Writing to a file
 ```sh
 $ cat << EOF > foo2
-> This file will be copied to foo3
-> EOF
+This file will be copied to foo3
+EOF
 $ cdp --input-file foo2 --output-file foo3
 $ cat foo3
 This will be copied to foo3
