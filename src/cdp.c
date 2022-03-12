@@ -28,7 +28,7 @@ void write_file(char* in_file, char* out_file){
 
     if(!fp) exit(EXIT_FAIL);           // can't read file.
     while((read = getline(&line, &len, fp)) != -1){
-      printf("%s\n", line);
+      printf("%s", line);
     }
     exit(EXIT_PASS);    // Success, file read.
   } else {
@@ -63,15 +63,13 @@ int main(int argc, char* argv[]){
   if(argc >= 2){
     if(strcmp(argv[1], "--help") == 0) show_help();
     if(strcmp(argv[1], "--input-file") == 0){
-      printf("argv[2] = char*? %s\n", __builtin_types_compatible_p(typeof(argv[2]), char*) ? "Yes" : "No"); // stupid gcc
-      printf("argv[4] = char*? %s\n", __builtin_types_compatible_p(typeof(argv[4]), char*) ? "Yes" : "No");
-      
       // copy to input_file
-      strcpy(input_file, argv[2]);
+      input_file = argv[2];
 
       // is output file detected?
-      if(strcmp(argv[3], "--output_file") == 0){
-        strcpy(output_file, argv[4]);
+      if(argc >= 4) {
+        if(strcmp(argv[3], "--output_file") != 0) output_file = "stdout";
+        output_file = argv[4];
       } else {
         output_file = "stdout";
       }
