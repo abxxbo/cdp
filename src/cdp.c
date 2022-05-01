@@ -85,8 +85,8 @@ int get_partis_check(char* drive, char* partition){
   nparts = blkid_partlist_numof_partitions(lp);
   printf("[ INFO ] There are %d paritions on the system.\n", nparts);
 
+  char* dev_name;
   for(i = 0; i < nparts; i++){
-    char* dev_name;
     pr = blkid_new_probe_from_filename(dev_name);
     blkid_do_probe(pr);
 
@@ -133,19 +133,12 @@ int main(int argc, char* argv[]){
           with_sudo = check_for_sudo();
           if(with_sudo != 0) exit(EXIT_FAIL);
 
-          // check if we did a system partition for argv[6]
-          char* drive = argv[6];
-          char* drive2 = drive[strlen(drive)-1] = '\0';
-
-          if(get_partis_check(drive2, drive) != 0){
-            exit(EXIT_FAIL);
-          }
-
-          // continue.
-          // write_file_to_partition(input_file, argv[5]);   // yes this requires different logic.
+          // parti => argv[6]
+          // drive => argv[8]
+          write_file_to_partition(input_file, argv[8], argv[6]); // yes this requires different logic.
         }
       }
-      if(output_file == NULL) output_file == "stdout";
+      if(*output_file == '\0') strcpy(output_file, "stdout");
     }
   }
 
