@@ -17,9 +17,9 @@ This is an example usage of all features presented in cdp.
 ### Partition Blocking
 ```sh
 # /dev/sda is a system partition -- we are running our machine on it.
-$ cdp --input-file example.iso --output-file /dev/sda
+$ cdp --input-file example.iso --output-file /dev/sda1 --drive /dev/sda
 [ INFO ] You are not using --force-partition, this will certainly lead to trouble.
-[ INFO ] /dev/sda is a system partition. I am not writing data to this partition.
+[ INFO ] /dev/sda1 is a system partition. I am not writing data to this partition.
 ```
 
 ### Writing to stdout

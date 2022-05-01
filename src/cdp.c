@@ -37,7 +37,7 @@ void write_file(char* in_file, char* out_file){
     // Using else, just to make sure.
     FILE* fp_ = fopen(in_file, "rb");
     FILE* fp2 = fopen(out_file, "a");
-    
+
     // Check if file is unreadable/unwriteable before we start.
     if(!fp_) {
       perror("cdp");
@@ -98,19 +98,26 @@ int get_partis_check(char* drive, char* partition){
   return sys_part;
 }
 // write to partition
-void write_file_to_partition(char* in, char* partition) {
+// in => file
+// drive => /dev/X (e.g. /dev/sda)
+// partition => /dev/XXXN (e.g. /dev/sda2)
+void write_file_to_partition(char* in, char* drive, char* partition) {
+  // check if partition is a system partition
+  if(get_partis_check(drive, partition) == 1) exit(EXIT_FAIL); // system partition
+  // now that it's taken care of, you can write to partition
+  write_file(in, partition); // this is what dd does...
 }
 
 int main(int argc, char* argv[]){
   // variables
-  char* input_file;     // input file -- REQUIRED.
-  char* output_file;    // output file -- if left blank assume /dev/stdout
+  char* input_file = 0;     // input file -- REQUIRED.
+  char* output_file = 0;    // output file -- if left blank assume /dev/stdout
   int with_sudo;        // is sudo passed?
   // Parse arguments
   if(argc >= 2){
     // help
     if(strcmp(argv[1], "--help") == 0) show_help();
-    
+
 
     if(strcmp(argv[1], "--input-file") == 0){
       // copy to input_file
@@ -119,12 +126,11 @@ int main(int argc, char* argv[]){
       // is output file detected?
       // output-file
       if(strcmp(argv[3], "--output-file") != 0) output_file = "stdout";
-      printf("%s : %s\n", argv[3], argv[4]);
-      output_file = argv[4];
 
-      if(argv >= 6){
+      // write to file
+      if(argc > 6 && argc < 7){
         if(strcmp(argv[5], "--force-partition") == 0){
-          int with_sudo = check_for_sudo();
+          with_sudo = check_for_sudo();
           if(with_sudo != 0) exit(EXIT_FAIL);
 
           // check if we did a system partition for argv[6]
@@ -136,7 +142,7 @@ int main(int argc, char* argv[]){
           }
 
           // continue.
-          write_file_to_partition(input_file, output_file);   // yes this requires different logic.
+          // write_file_to_partition(input_file, argv[5]);   // yes this requires different logic.
         }
       }
       if(output_file == NULL) output_file == "stdout";
@@ -144,7 +150,8 @@ int main(int argc, char* argv[]){
   }
 
   // do thing
-  write_file(input_file, output_file);
+  if(argc < 4) write_file(input_file, "stdout");
+  else write_file(input_file, argv[4]);
 
   // quit
   return EXIT_PASS;
