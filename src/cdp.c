@@ -52,6 +52,7 @@ void write_file(char* in_file, char* out_file){
       // write to fp2
       fprintf(fp2, "%s", line);
     }
+    printf("Done.\n");
     exit(EXIT_PASS);    // Success, file written
   }
 }
@@ -101,11 +102,9 @@ int get_partis_check(char* drive, char* partition){
 // in => file
 // drive => /dev/X (e.g. /dev/sda)
 // partition => /dev/XXXN (e.g. /dev/sda2)
-void write_file_to_partition(char* in, char* drive, char* partition) {
-  // check if partition is a system partition
-  if(get_partis_check(drive, partition) == 1) exit(EXIT_FAIL); // system partition
-  // now that it's taken care of, you can write to partition
+void write_file_to_partition(char* in, char* partition) {
   write_file(in, partition); // this is what dd does...
+  printf(" [ INFO ] wrote %s to partiton %s\n", in, partition);
 }
 
 int main(int argc, char* argv[]){
@@ -128,14 +127,23 @@ int main(int argc, char* argv[]){
       if(strcmp(argv[3], "--output-file") != 0) output_file = "stdout";
 
       // write to file
-      if(argc > 6 && argc < 7){
-        if(strcmp(argv[5], "--force-partition") == 0){
-          with_sudo = check_for_sudo();
-          if(with_sudo != 0) exit(EXIT_FAIL);
+      // NOTE: it took me ~20 minutes to figure out why this wasn't running.
+      // turns out the error was that it was not supposed to be >=.
+      if(argc <= 10){ // 6 wasnt enough
+        // if --drive is passed, check if --force-partiton is given.
+        if(strcmp(argv[5], "--drive") == 0){
+          // check if force partition is used at all
+          if(strcmp(argv[6], "--force-partition") == 0){
+            with_sudo = check_for_sudo();
+            if(with_sudo != 0) exit(EXIT_FAIL);
 
-          // parti => argv[6]
-          // drive => argv[8]
-          write_file_to_partition(input_file, argv[8], argv[6]); // yes this requires different logic.
+            // parti => argv[4]
+            write_file_to_partition(input_file, argv[4]); // yes this requires different logic.
+            exit(0);
+          } else {
+            printf("[ INFO ] You are not using --force-partition, this will certainly lead to trouble.\n");
+            exit(EXIT_FAIL);
+          }
         }
       }
       if(*output_file == '\0') strcpy(output_file, "stdout");
